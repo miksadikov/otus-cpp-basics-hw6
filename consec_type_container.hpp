@@ -48,7 +48,7 @@ template <class T>
 ConsecTypeContainer<T>::ConsecTypeContainer() {
   m_Capacity = 0;
   m_Size = 0;
-  m_Buffer = 0;
+  m_Buffer = nullptr;
 }
 
 template <class T>

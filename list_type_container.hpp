@@ -19,7 +19,7 @@ class ListTypeContainer {
  private:
   Node<T>* m_Head;
   Node<T>* m_Tail;
-  bool m_IsEmpty;
+  size_t m_Size;
 
  public:
   ListTypeContainer();
@@ -49,7 +49,7 @@ class ListTypeContainer {
 
 template <typename T>
 ListTypeContainer<T>::ListTypeContainer()
-    : m_Head(nullptr), m_Tail(nullptr), m_IsEmpty(true) {}
+    : m_Head(nullptr), m_Tail(nullptr), m_Size(0) {}
 
 template <typename T>
 ListTypeContainer<T>::~ListTypeContainer() {
@@ -62,19 +62,20 @@ template <typename T>
 void ListTypeContainer<T>::push_back(const T& val) {
   Node<T>* node = new Node<T>;
   node->m_Value = val;
-  if (false == m_IsEmpty) {
+  if (m_Size > 0) {
     m_Tail->m_Next = node;
     node->m_Prev = m_Tail;
     m_Tail = node;
   } else {
     m_Head = m_Tail = node;
   }
-  m_IsEmpty = false;
+  m_Size++;
 }
 
 template <typename T>
 void ListTypeContainer<T>::pop_back() {
-  if (false == m_IsEmpty) {
+  if (m_Size > 0) {
+    m_Size--;
     Node<T>* delNode = m_Tail;
     m_Tail = m_Tail->m_Prev;
     if (nullptr == m_Tail) {
@@ -82,21 +83,14 @@ void ListTypeContainer<T>::pop_back() {
       if (delNode != nullptr) {
         delete delNode;
       }
-      m_IsEmpty = true;
       return;
     }
     m_Tail->m_Next = nullptr;
     if (delNode != nullptr) {
       delete delNode;
     }
-    if ((nullptr == m_Head) && (nullptr == m_Tail)) {
-      m_IsEmpty = true;
-    } else {
-      m_IsEmpty = false;
-    }
   } else {
     std::cout << "pop_back() error: container is empty" << std::endl;
-    m_IsEmpty = true;
   }
 }
 
@@ -118,7 +112,6 @@ void ListTypeContainer<T>::remove(std::size_t position) {
     } else {
       // when container empty after delete
       m_Tail = nullptr;
-      m_IsEmpty = true;
     }
   } else {
     Node<T>* temp = m_Head;
@@ -144,6 +137,7 @@ void ListTypeContainer<T>::remove(std::size_t position) {
       delete temp;
     }
   }
+  m_Size--;
 }
 
 template <typename T>
@@ -158,6 +152,7 @@ void ListTypeContainer<T>::insert(std::size_t position, const T& val) {
     node->m_Next = m_Head;
     m_Head->m_Prev = node;
     m_Head = node;
+    m_Size++;
   } else {
     Node<T>* temp = m_Head;
     for (int i = 0; i < position - 1; i++) {
@@ -169,8 +164,10 @@ void ListTypeContainer<T>::insert(std::size_t position, const T& val) {
       node->m_Next = temp->m_Next;
       node->m_Prev = temp;
       temp->m_Next = node;
-      if (nullptr != node->m_Next)
+      if (nullptr != node->m_Next) {
         node->m_Next->m_Prev = node;
+      }
+      m_Size++;
     } else {
       std::cout << "insert() error: the previous node is null" << std::endl;
     }
@@ -216,9 +213,5 @@ T ListTypeContainer<T>::operator[](std::size_t position) {
 
 template <typename T>
 size_t ListTypeContainer<T>::size() const {
-  size_t s = 0;
-  for (Node<T>* n = m_Head; n != nullptr; n = n->m_Next) {
-    ++s;
-  }
-  return s;
+  return m_Size;
 }
